@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discussion App</title>
+    <style>
+      body {
+        display: flex;
+        height: 100vh;
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f9;
+      }
+
+      #left-pane {
+        width: 30%;
+        border-right: 1px solid #ddd;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      #right-pane {
+        width: 70%;
+        padding: 20px;
+        background-color: #f4f7f9;
+      }
+
+      h2 {
+        margin-top: 0;
+        color: #333;
+      }
+
+      .question-box {
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #fff;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+
+      .question-box:hover {
+        background-color: #f0f8ff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .response {
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+
+      form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 14px;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #responses-list h3 {
+        margin-top: 0;
+      }
+
+      #resolve-button {
+        background-color: #e74c3c;
+        margin-top: 20px;
+      }
+
+      #resolve-button:hover {
+        background-color: #c0392b;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="left-pane">
+      <h2>Questions</h2>
+      <div id="questions-list"></div>
+    </div>
+
+    <div id="right-pane">
+      <h2>Ask a Question</h2>
+      <form id="question-form">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required /><br /><br />
+        <label for="question">Question:</label>
+        <textarea id="question" name="question" required></textarea><br /><br />
+        <button type="submit">Submit Question</button>
+      </form>
+
+      <div id="question-detail" class="hidden">
+        <h2 id="question-title"></h2>
+        <p id="question-text"></p>
+
+        <form id="response-form">
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" required /><br /><br />
+          <label for="comment">Comment:</label>
+          <textarea id="comment" name="comment" required></textarea><br /><br />
+          <button type="submit">Submit Response</button>
+        </form>
+
+        <h3>Previous Responses:</h3>
+        <div id="responses-list"></div>
+
+        <button id="resolve-button">Resolve</button>
+      </div>
+    </div>
+
+    <script>
+      let questions = [];
+
+      const questionForm = document.getElementById("question-form");
+      const questionsList = document.getElementById("questions-list");
+      const rightPane = document.getElementById("right-pane");
+      const questionDetail = document.getElementById("question-detail");
+      const questionTitle = document.getElementById("question-title");
+      const questionText = document.getElementById("question-text");
+      const responseForm = document.getElementById("response-form");
+      const responsesList = document.getElementById("responses-list");
+      const resolveButton = document.getElementById("resolve-button");
+
+      questionForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const title = document.getElementById("title").value;
+        const question = document.getElementById("question").value;
+
+        const questionObj = { title, question, responses: [] };
+        questions.push(questionObj);
+
+        const questionElement = document.createElement("div");
+        questionElement.className = "question-box";
+        questionElement.innerText = title;
+        questionElement.addEventListener("click", function () {
+          displayQuestionDetail(questionObj);
+        });
+
+        questionsList.appendChild(questionElement);
+
+        questionForm.reset();
+      });
+
+      function displayQuestionDetail(questionObj) {
+        questionForm.classList.add("hidden");
+        questionDetail.classList.remove("hidden");
+
+        questionTitle.innerText = questionObj.title;
+        questionText.innerText = questionObj.question;
+        responsesList.innerHTML = "";
+
+        questionObj.responses.forEach((response) => {
+          const responseElement = document.createElement("div");
+          responseElement.className = "response";
+          responseElement.innerHTML = `<strong>${response.name}</strong>: ${response.comment}`;
+          responsesList.appendChild(responseElement);
+        });
+
+        responseForm.onsubmit = function (e) {
+          e.preventDefault();
+          const name = document.getElementById("name").value;
+          const comment = document.getElementById("comment").value;
+
+          const responseObj = { name, comment };
+          questionObj.responses.push(responseObj);
+
+          const responseElement = document.createElement("div");
+          responseElement.className = "response";
+          responseElement.innerHTML = `<strong>${name}</strong>: ${comment}`;
+          responsesList.appendChild(responseElement);
+
+          responseForm.reset();
+        };
+
+        resolveButton.onclick = function () {
+          questionDetail.classList.add("hidden");
+          questionForm.classList.remove("hidden");
+        };
+      }
+    </script>
+  </body>
+</html>
